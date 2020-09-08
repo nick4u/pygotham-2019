@@ -1,6 +1,9 @@
 from sqlalchemy.sql.expression import func, literal
 
-from pygotham_2019 import meta, model, sales
+from pygotham_2019 import sales
+from pygotham_2019.meta import session
+from pygotham_2019.model import Sale
+
 from pygotham_2019.utils import print_table
 
 
@@ -9,33 +12,33 @@ if __name__ == "__main__":
     sales.setup()
 
     sales_by_region = (
-        meta.session.query(
-            func.left(model.Sale.store_id, 4).label("region"),
-            func.sum(model.Sale.amount).label("amount"),
+        session.query(
+            func.left(Sale.store_id, 4).label("region"),
+            func.sum(Sale.amount).label("amount"),
         )
         .group_by(literal(1))
     ).cte("regions")
 
     sales_by_state = (
-        meta.session.query(
-            func.left(model.Sale.store_id, 7).label("state"),
-            func.sum(model.Sale.amount).label("amount"),
+        session.query(
+            func.left(Sale.store_id, 7).label("state"),
+            func.sum(Sale.amount).label("amount"),
         )
         .group_by(literal(1))
     ).cte("states")
 
     sales_by_store = (
-        meta.session.query(
-            model.Sale.store_id.label("store_id"),
-            func.left(model.Sale.store_id, 7).label("state"),
-            func.left(model.Sale.store_id, 4).label("region"),
-            func.sum(model.Sale.amount).label("amount"),
+        session.query(
+            Sale.store_id.label("store_id"),
+            func.left(Sale.store_id, 7).label("state"),
+            func.left(Sale.store_id, 4).label("region"),
+            func.sum(Sale.amount).label("amount"),
         )
         .group_by(literal(1), literal(2), literal(3))
     ).cte("stores")
 
     sales_report = (
-        meta.session.query(
+        session.query(
             sales_by_region.c.region.label("region"),
             sales_by_region.c.amount.label("sales_for_region"),
             sales_by_state.c.state.label("state"),

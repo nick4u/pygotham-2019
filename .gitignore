@@ -1,3 +1,6 @@
 virtualenv
 __pycache__
 *.egg-info
+/.idea/
+/.venv/
+/.env
